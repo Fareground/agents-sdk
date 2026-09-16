@@ -5,9 +5,15 @@ Defines the contract all persistence backends must implement.
 """
 
 from abc import ABC, abstractmethod
+from collections.abc import AsyncIterator
 from typing import Any
 
 from fg_agents.core.types import AgentMessage, AgentSession
+
+
+def validate_message_batch_size(batch_size: int) -> None:
+    if type(batch_size) is not int or not 1 <= batch_size <= 256:
+        raise ValueError("message batch_size must be an integer from 1 to 256")
 
 
 class BaseRepository(ABC):
@@ -90,6 +96,47 @@ class BaseRepository(ABC):
         session_id: str,
         include_summarized: bool = False,
     ) -> list[AgentMessage]: ...
+
+    async def get_message(self, session_id: str, message_id: str) -> AgentMessage | None:
+        """Read one original, including summarized history, within this session.
+
+        Compatibility fallback for third-party repositories. Shipped backends
+        override this with a targeted read; callers must still authorize the
+        session's owner and tenant before accessing its history.
+        """
+        return next((m for m in await self.get_messages(session_id, include_summarized=True)
+                     if m.id == message_id), None)
+
+    async def get_context_windows(self, session_id: str, *, head_chars: int = 12_000,
+                                  tail_chars: int = 400, exempt_tools: tuple[str, ...] = ()):
+        """Project active tool text without changing get_messages ordering.
+
+        Durable backends select bounded head/tail strings in SQL, lazily
+        indexing legacy originals in an additive, disposable cache. This default
+        preserves compatibility for third-party/in-memory repositories, but
+        does not promise bounded storage I/O. Callers must handle partial
+        windows explicitly; user/assistant content and tool arguments stay whole.
+        """
+        from .content_window import MessageContentWindow, validate_content_window
+
+        validate_content_window(head_chars, tail_chars, exempt_tools)
+        return [MessageContentWindow.from_message(m, head_chars=head_chars, tail_chars=tail_chars,
+                                                   exempt_tools=exempt_tools)
+                for m in await self.get_messages(session_id, include_summarized=False)]
+
+    async def iter_messages(
+        self, session_id: str, *, include_summarized: bool = True, batch_size: int = 64,
+    ) -> AsyncIterator[AgentMessage]:
+        """Scan originals for archive recovery, not model-context assembly.
+
+        Shipped durable backends hydrate at most batch_size rows at a time.
+        This compatibility fallback retains third-party repository behavior.
+        Archive tie ordering may differ from live-context ordering; do not use
+        this API to reconstruct a model's assistant/tool exchange sequence.
+        """
+        validate_message_batch_size(batch_size)
+        for message in await self.get_messages(session_id, include_summarized=include_summarized):
+            yield message
 
     @abstractmethod
     async def mark_messages_summarized(
