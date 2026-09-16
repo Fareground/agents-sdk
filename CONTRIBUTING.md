@@ -76,3 +76,7 @@ authored by the human making the change.
 2. Add message/tool format converters for the provider.
 3. Wire it into client initialization (`_get_client()`).
 4. Add the optional dependency in `pyproject.toml`.
+
+## Documentation
+
+Edit the Agents SDK tutorials in `docs/`. Regenerate `docs/reference.md` with `PYTHONPATH=src python scripts/build_docs_reference.py`. The Fareground site imports these sources through `site/sync_sdk_docs.py`; update the source repository first.
