@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.3] - 2026-09-16
+
+- Add session-scoped archived-message retrieval and bounded iteration across memory, SQLite and PostgreSQL repositories.
+- Add context windows for large tool results, preserving complete original messages for recovery. Durable stores cache these projections without repeatedly loading full bodies.
+- Restore compatibility with Fareground’s existing recoverable conversation context.
+
 ## [0.4.2] - 2026-09-16
 
 ### Tool argument safety (T-541)
