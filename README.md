@@ -5,7 +5,7 @@
   </picture>
 </p>
 
-# Agents SDK
+<h1 align="center">Agents SDK</h1>
 
 <p align="center">
   <em>Build agents with tools, conversations and streaming in Python.</em>
