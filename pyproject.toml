@@ -4,9 +4,9 @@ build-backend = "hatchling.build"
 
 [project]
 name = "fg-agents"
-version = "0.4.0"
+version = "0.4.1"
 license = { text = "Apache-2.0" }
-description = "Agent framework for web applications. SSE streaming, PostgreSQL persistence, FastAPI integration."
+description = "Agents SDK for Python applications: tools, conversations, streaming and persistence."
 readme = "README.md"
 requires-python = ">=3.11"
 keywords = ["ai", "agents", "llm", "react", "web", "fastapi", "sse", "streaming", "backend"]
@@ -46,7 +46,8 @@ dev = [
 ]
 
 [project.urls]
-Repository = "https://github.com/Fareground/agent-framework"
+Documentation = "https://fareground.com/docs/agents-sdk/"
+Repository = "https://github.com/Fareground/agents-sdk"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/fg_agents"]

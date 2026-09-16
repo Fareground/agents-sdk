@@ -5,14 +5,14 @@
   </picture>
 </p>
 
-# agent-framework
+# Agents SDK
 
 <p align="center">
-  <em>An agent framework built for web applications — not laptops.</em>
+  <em>Build agents with tools, conversations and streaming in Python.</em>
 </p>
 
 <p align="center">
-  <a href="https://github.com/Fareground/agent-framework/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/Fareground/agent-framework/ci.yml?branch=main&style=flat-square&label=CI" /></a>
+  <a href="https://github.com/Fareground/agents-sdk/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/Fareground/agents-sdk/ci.yml?branch=main&style=flat-square&label=CI" /></a>
   <img src="https://img.shields.io/badge/python-3.11%2B-blue" alt="Python 3.11+" />
   <a href="https://pypi.org/project/fg-agents/"><img src="https://img.shields.io/pypi/v/fg-agents?style=flat-square" alt="PyPI" /></a>
   <img src="https://img.shields.io/badge/license-Apache--2.0-lightgrey" alt="Apache-2.0" />
@@ -22,18 +22,9 @@
 
 ## Overview
 
-Almost every agent framework — Claude Agent SDK, LangChain agents, AutoGen,
-CrewAI — was built to run on your local machine. They read and write files on a
-laptop, expect a terminal, and assume a single user. They're excellent for
-personal automation and coding assistants, but none of that translates the
-moment you want an agent **inside a real web product**: there's no filesystem,
-there are many users each with their own data, replies must stream to a browser,
-and sessions must survive a server restart.
+The Agents SDK provides `ask()` for one-shot requests, `Agent` for conversations, and explicit engine components for application integration. Add tools, stream results, and choose in-memory, SQLite or PostgreSQL persistence.
 
-This framework is designed from day one for that world. Drop it into a
-FastAPI/Starlette app and you get a working AI agent backend — SSE streaming,
-async persistence (PostgreSQL, SQLite, in-memory), multi-tenant isolation, and
-multi-agent orchestration — without writing the plumbing yourself.
+[Documentation](https://fareground.com/docs/agents-sdk/) · [Quickstart](docs/getting-started.md) · [Tools](docs/tools.md) · [Production integration](docs/production.md)
 
 It is the runtime layer in Fareground's family of open agent building blocks,
 alongside [`agent-id`](https://github.com/Fareground/agent-id) (identity),
@@ -58,7 +49,7 @@ What it deliberately does **not** do:
 > **Package names.** The distribution is published as **`fg-agents`** and the
 > import package is **`fg_agents`** (e.g. `from fg_agents import create_app`).
 > These are the names dependents rely on and are intentionally left unchanged;
-> the repository name is `agent-framework`.
+> the repository name is `agents-sdk`.
 
 ## Install
 
@@ -244,6 +235,8 @@ hello-world to a complete chat UI ([`examples/04_web_app.py`](examples/04_web_ap
 plus frontend SSE clients in [`examples/frontend/`](examples/frontend).
 
 ## Documentation
+
+Start at [docs/index.md](docs/index.md) for tutorials, concepts, provider setup, tools, hosting and troubleshooting.
 
 - [`docs/api.md`](docs/api.md) — reference for the public API surface
 - [`docs/streaming.md`](docs/streaming.md) — the SSE wire format and every event type (for frontend authors)
