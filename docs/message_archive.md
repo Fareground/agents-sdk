@@ -27,3 +27,23 @@ inherit compatible all-row fallbacks until they implement the efficient reads.
 
 Run PostgreSQL acceptance against a disposable database using
 `SDK_TEST_DATABASE_URL`, then `python -m pytest tests/test_archive_reads.py`.
+
+## Bounded active context
+
+`await repository.get_context_windows(session_id, head_chars=12000,
+tail_chars=400, exempt_tools=())` returns active messages in the same order as
+`get_messages()`. Each item has `message`, `partial`, `head`, `tail` and
+`total_characters`. A partial item has an empty `message.content`; explicitly
+label the head and tail as an excerpt before including them in model context.
+Use `get_message(session_id, message.id)` to recover its complete original.
+
+Only large plain-text tool results are projected. User instructions, assistant
+messages, tool arguments, structured content and named `exempt_tools` remain
+whole. The head must be an integer from 1 to 64000, and the tail must be an
+integer from zero to the head size. Booleans are not accepted as sizes.
+
+SQLite and PostgreSQL keep an additive, derived cache of content windows and
+backfill it lazily for old messages. Original messages remain unchanged. The
+cache is removed with its session history and can be rebuilt from originals.
+Memory and third-party fallback repositories provide the same return shape,
+but already hydrate complete messages and do not promise bounded storage I/O.

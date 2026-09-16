@@ -46,7 +46,7 @@ dev = [
 ]
 
 [project.urls]
-Documentation = "https://fareground.com/docs/agents-sdk/"
+Documentation = "https://fareground.com/docs/agent-framework/"
 Repository = "https://github.com/Fareground/agents-sdk"
 
 [tool.hatch.build.targets.wheel]
