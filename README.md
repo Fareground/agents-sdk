@@ -24,7 +24,7 @@
 
 The Agents SDK provides `ask()` for one-shot requests, `Agent` for conversations, and explicit engine components for application integration. Add tools, stream results, and choose in-memory, SQLite or PostgreSQL persistence.
 
-[Documentation](https://fareground.com/docs/agents-sdk/) · [Quickstart](docs/getting-started.md) · [Tools](docs/tools.md) · [Production integration](docs/production.md)
+[Documentation](https://fareground.com/docs/agent-framework/) · [Quickstart](docs/getting-started.md) · [Tools](docs/tools.md) · [Production integration](docs/production.md)
 
 It is the runtime layer in Fareground's family of open agent building blocks,
 alongside [`agent-id`](https://github.com/Fareground/agent-id) (identity),

@@ -28,6 +28,6 @@ Python 3.11 or later. Install the extra for your provider or integration. These 
 
 ## Relationship to the Environments SDK
 
-The [Environments SDK](https://fareground.com/docs/environments-sdk/) defines and executes simulation rules. The Agents SDK runs an agent's reasoning and tools. They are independent packages. Use the environment's participant interface when connecting an agent; do not let the agent bypass the environment's rules.
+The [Environments SDK](https://fareground.com/docs/env-kernel/) defines and executes simulation rules. The Agents SDK runs an agent's reasoning and tools. They are independent packages. Use the environment's participant interface when connecting an agent; do not let the agent bypass the environment's rules.
 
 [GitHub](https://github.com/Fareground/agents-sdk) · [PyPI](https://pypi.org/project/fg-agents/) · [Migration](migration.md) · [Apache-2.0](https://github.com/Fareground/agents-sdk/blob/main/LICENSE)
