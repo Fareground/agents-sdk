@@ -1059,12 +1059,15 @@ class AgentEngine:
                 if context_compacted or attempt >= max_retries:
                     raise
                 log.warning("context_overflow_retry", session_id=session_id, attempt=attempt + 1)
-                # Compact context and retry once
+                # A provider overflow is authoritative even when our estimate
+                # is below its threshold. Recover for the model actually called
+                # (which may be a smaller fallback), then retry once.
                 messages = await self._context_manager.build_context(
                     session_id,
                     system_prompt,
-                    agent_def.model,
+                    model,
                     llm=self._llm,
+                    force_compact=True,
                 )
                 context_compacted = True
 

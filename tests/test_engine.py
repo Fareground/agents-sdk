@@ -407,3 +407,30 @@ async def test_resume_after_cancel_generates_again():
     assert EventType.SESSION_COMPLETED in [e.type for e in events]
     msgs = await repo.get_messages("s1")
     assert any("second answer" in (m.content or "") for m in msgs if m.role == MessageRole.ASSISTANT)
+
+
+@pytest.mark.asyncio
+async def test_provider_overflow_forces_compaction_for_the_actual_model():
+    from unittest.mock import AsyncMock
+    from fg_agents.core.errors import ContextOverflowError
+    from fg_agents.core.types import AgentMessage
+
+    class OverflowOnce(MockLLM):
+        async def stream_with_tools(self, **kwargs):
+            if not self._call_count:
+                self._call_count += 1
+                raise ContextOverflowError('Provider reports overflow', provider='mock', model='mock:smaller')
+            assert kwargs['messages'][0].content == 'Recovered context'
+            async for chunk in super().stream_with_tools(**kwargs):
+                yield chunk
+
+    llm = OverflowOnce([make_text_response('Recovered')])
+    engine, _, _ = await build_engine(llm)
+    compact = [AgentMessage(role=MessageRole.USER, content='Recovered context')]
+    engine._context_manager.build_context = AsyncMock(return_value=compact)
+    agent = AgentDefinition(name='test', model='mock:primary', max_llm_retries=1)
+    response = await engine._call_single_model('s1', [AgentMessage(role=MessageRole.USER, content='Hi')],
+                                               [], agent, 'Instructions', 1, 'mock:smaller')
+    assert response[0] == 'Recovered'
+    engine._context_manager.build_context.assert_awaited_once_with(
+        's1', 'Instructions', 'mock:smaller', llm=llm, force_compact=True)
