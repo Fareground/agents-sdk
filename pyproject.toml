@@ -46,8 +46,11 @@ dev = [
 ]
 
 [project.urls]
+Homepage = "https://github.com/Fareground/agents-sdk"
 Documentation = "https://fareground.com/docs/agent-framework/"
 Repository = "https://github.com/Fareground/agents-sdk"
+Changelog = "https://github.com/Fareground/agents-sdk/blob/main/CHANGELOG.md"
+Issues = "https://github.com/Fareground/agents-sdk/issues"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/fg_agents"]
