@@ -681,9 +681,10 @@ class AgentEngine:
                         reason = result.error or output_content
                         output_content = (
                             f"TOOL CALL FAILED ({tc.tool_name}): {reason}\n"
-                            "This call did NOT take effect. Read the reason, change "
-                            "your arguments accordingly, and try a DIFFERENT call — "
-                            "do not repeat the same arguments.\n"
+                            "Some effects may have occurred before failure. Inspect the "
+                            "result and current state, follow any recovery guidance, "
+                            "and correct invalid arguments before retrying. Do not "
+                            "blindly repeat the call.\n"
                             f"Raw result: {output_content}"
                         )
                     tool_msg = AgentMessage(
