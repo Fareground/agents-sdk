@@ -385,6 +385,8 @@ class LLMUsage(BaseModel):
 class LLMStreamChunk(BaseModel):
     """A single chunk from a streaming LLM response."""
 
+    provider_state: dict[str, Any] | None = None
+
     type: (
         str  # "text_delta", "tool_call_start", "tool_call_delta", "tool_call_end", "usage", "stop"
     )
@@ -399,6 +401,8 @@ class LLMStreamChunk(BaseModel):
 
 class LLMResponse(BaseModel):
     """Complete (non-streaming) LLM response."""
+
+    provider_state: dict[str, Any] | None = None
 
     content: str = ""
     tool_calls: list[ToolCall] = Field(default_factory=list)

@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.6] - 2026-09-17
+
+- Preserve OpenRouter reasoning continuation data across streamed tool calls and
+  durable message history. Replay signed/encrypted fragments in their original
+  order only to the same provider and model. Use plaintext continuation only
+  when the provider supplied no structured reasoning details.
+- Expose continuation state on non-streaming responses without rendering opaque
+  provider blocks as assistant text.
+
 ## [0.4.5] - 2026-09-16
 
 - Correct model-facing tool failure guidance: failures and timeouts do not imply

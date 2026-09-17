@@ -465,7 +465,7 @@ class AgentEngine:
 
                 # Re-raise any LLM error
                 try:
-                    full_text, tool_calls, usage, stop_reason, thinking_text = await llm_future
+                    full_text, tool_calls, usage, stop_reason, thinking_text, provider_state = await llm_future
                 except (LLMError, ContextOverflowError) as e:
                     # Turn-level recovery: don't fail the session, allow resume
                     log.error(
@@ -493,6 +493,7 @@ class AgentEngine:
                 # Run middleware: after_llm_call
                 llm_response = LLMResponse(
                     content=full_text,
+                    provider_state=provider_state,
                     tool_calls=tool_calls,
                     stop_reason=stop_reason,
                     usage=usage,
@@ -515,6 +516,12 @@ class AgentEngine:
                     persist_content = blocks
                 else:
                     persist_content = llm_response.content
+
+                if llm_response.provider_state:
+                    if isinstance(persist_content, str):
+                        persist_content = ([{"type": "text", "text": persist_content}]
+                                           if persist_content else [])
+                    persist_content.append({"type": "provider_state", "state": llm_response.provider_state})
 
                 assistant_msg = AgentMessage(
                     session_id=session_id,
@@ -886,7 +893,7 @@ class AgentEngine:
         system_prompt: str,
         turn: int,
         on_stream_event: Any = None,
-    ) -> tuple[str, list[ToolCall], LLMUsage, StopReason, str]:
+    ) -> tuple[str, list[ToolCall], LLMUsage, StopReason, str, dict[str, Any] | None]:
         """
         Call LLM with automatic retry on transient errors + provider fallback.
 
@@ -945,7 +952,7 @@ class AgentEngine:
         turn: int,
         model: str,
         on_stream_event: Any = None,
-    ) -> tuple[str, list[ToolCall], LLMUsage, StopReason]:
+    ) -> tuple[str, list[ToolCall], LLMUsage, StopReason, str, dict[str, Any] | None]:
         """Call a single model with retry logic.
 
         Args:
@@ -973,12 +980,13 @@ class AgentEngine:
                 # Collect streamed response with timeout
                 full_text = ""
                 thinking_text = ""
+                provider_state = None
                 tool_calls: list[ToolCall] = []
                 usage = LLMUsage()
                 stop_reason = StopReason.END_TURN
 
                 async def _collect_stream():
-                    nonlocal full_text, thinking_text, usage, stop_reason
+                    nonlocal full_text, thinking_text, usage, stop_reason, provider_state
                     async for chunk in response:
                         if chunk.type == "text_delta" and chunk.text:
                             full_text += chunk.text
@@ -1008,6 +1016,8 @@ class AgentEngine:
                                 usage = chunk.usage
                             if chunk.stop_reason:
                                 stop_reason = chunk.stop_reason
+                        elif chunk.type == "provider_state":
+                            provider_state = chunk.provider_state
                         elif chunk.type == "complete":
                             if chunk.text:
                                 full_text = chunk.text
@@ -1041,7 +1051,7 @@ class AgentEngine:
                     full_text = thinking_text.strip()
                     thinking_text = ""
 
-                return full_text, tool_calls, usage, stop_reason, thinking_text
+                return full_text, tool_calls, usage, stop_reason, thinking_text, provider_state
 
             except LLMRateLimitError as e:
                 if attempt >= max_retries:

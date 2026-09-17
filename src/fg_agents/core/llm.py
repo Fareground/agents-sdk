@@ -174,6 +174,7 @@ def _messages_to_anthropic(
 def _messages_to_openai(
     messages: list[AgentMessage],
     system_prompt: str,
+    *, provider: str | None = None, model_name: str | None = None,
 ) -> list[dict]:
     """Convert framework messages to OpenAI API format."""
     api_messages = [{"role": "system", "content": system_prompt}]
@@ -191,6 +192,16 @@ def _messages_to_openai(
             m: dict[str, Any] = {"role": "assistant"}
             text = msg.text() if isinstance(msg.content, list) else msg.content
             m["content"] = text or ""
+            if provider == "openrouter" and isinstance(msg.content, list):
+                for block in msg.content:
+                    state = block.get("state") if block.get("type") == "provider_state" else None
+                    if not isinstance(state, dict):
+                        continue
+                    if state.get("provider") == provider and state.get("model") == model_name:
+                        if state.get("reasoning_details"):
+                            m["reasoning_details"] = state["reasoning_details"]
+                        elif state.get("reasoning"):
+                            m["reasoning"] = state["reasoning"]
             if msg.tool_calls:
                 m["tool_calls"] = [
                     {
@@ -701,7 +712,7 @@ class AgentLLM:
         self, messages, tools, model_name, system_prompt, temperature, max_tokens, provider
     ) -> AsyncIterator[LLMStreamChunk]:
         client = await self._get_client(provider)
-        api_messages = _messages_to_openai(messages, system_prompt)
+        api_messages = _messages_to_openai(messages, system_prompt, provider=provider, model_name=model_name)
         api_tools = _tools_to_openai(tools) if tools else None
 
         kwargs: dict[str, Any] = {
@@ -749,6 +760,8 @@ class AgentLLM:
             stop_reason = StopReason.END_TURN
             think_splitter = _ThinkSplitter()
             saw_reasoning_channel = False
+            reasoning_details: list[dict[str, Any]] = []
+            reasoning_parts: list[str] = []
 
             async for chunk in stream:
                 choice = chunk.choices[0] if chunk.choices else None
@@ -764,9 +777,18 @@ class AgentLLM:
 
                 delta = choice.delta
 
+                if provider == "openrouter":
+                    # Preserve opaque fragments in provider order, including signatures
+                    # and encrypted blocks. They are continuation state, not UI text.
+                    for detail in getattr(delta, "reasoning_details", None) or []:
+                        reasoning_details.append(detail.model_dump(mode="json")
+                                                 if hasattr(detail, "model_dump") else dict(detail))
+
                 # Thinking/reasoning tokens (Together, DeepSeek, Qwen, etc.)
                 reasoning = getattr(delta, "reasoning_content", None) or getattr(delta, "reasoning", None)
                 if reasoning:
+                    if provider == "openrouter":
+                        reasoning_parts.append(reasoning)
                     saw_reasoning_channel = True
                     yield LLMStreamChunk(type="thinking_delta", text=reasoning)
 
@@ -841,6 +863,14 @@ class AgentLLM:
                 stop_reason=stop_reason,
             )
 
+            if provider == "openrouter" and (reasoning_details or reasoning_parts):
+                state = {"provider": provider, "model": model_name}
+                if reasoning_details:
+                    state["reasoning_details"] = reasoning_details
+                else:
+                    state["reasoning"] = "".join(reasoning_parts)
+                yield LLMStreamChunk(type="provider_state", provider_state=state)
+
             log.info(
                 "llm_stream_complete",
                 provider=provider,
@@ -872,6 +902,7 @@ class AgentLLM:
         tool_calls: list[ToolCall] = []
         usage: LLMUsage | None = None
         stop_reason: StopReason | None = None
+        provider_state = None
 
         async for chunk in self._stream_openai(
             messages, tools, model_name, system_prompt, temperature, max_tokens, provider
@@ -880,6 +911,8 @@ class AgentLLM:
                 content_parts.append(chunk.text)
             elif chunk.type == "tool_call_end" and chunk.tool_call:
                 tool_calls.append(chunk.tool_call)
+            elif chunk.type == "provider_state":
+                provider_state = chunk.provider_state
             elif chunk.type == "usage":
                 usage = chunk.usage or usage
                 stop_reason = chunk.stop_reason or stop_reason
@@ -889,6 +922,7 @@ class AgentLLM:
 
         return LLMResponse(
             content="".join(content_parts),
+            provider_state=provider_state,
             tool_calls=tool_calls,
             stop_reason=stop_reason,
             model=f"{provider}:{model_name}",

@@ -101,14 +101,19 @@ async def _test_messages(repo: BaseRepository):
     await repo.create_session(AgentSession(id="s1", agent_id="a"))
 
     msg1 = AgentMessage(id="m1", session_id="s1", role=MessageRole.USER, content="Hello")
-    msg2 = AgentMessage(id="m2", session_id="s1", role=MessageRole.ASSISTANT, content="Hi")
+    msg2 = AgentMessage(id="m2", session_id="s1", role=MessageRole.ASSISTANT, content=[
+        {"type": "text", "text": "Hi"},
+        {"type": "provider_state", "state": {"provider": "openrouter", "model": "test",
+         "reasoning_details": [{"type": "reasoning.encrypted", "data": "opaque", "index": 0}]}},
+    ])
     await repo.add_message(msg1)
     await repo.add_message(msg2)
 
     msgs = await repo.get_messages("s1")
     assert len(msgs) == 2
     assert msgs[0].content == "Hello"
-    assert msgs[1].content == "Hi"
+    assert msgs[1].content == msg2.content
+    assert msgs[1].text() == "Hi"
 
     await repo.mark_messages_summarized("s1", ["m1"])
     msgs = await repo.get_messages("s1", include_summarized=False)
