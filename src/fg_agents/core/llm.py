@@ -194,7 +194,9 @@ def _messages_to_openai(
             m["content"] = text or ""
             if provider == "openrouter" and isinstance(msg.content, list):
                 for block in msg.content:
-                    state = block.get("state", {}) if block.get("type") == "provider_state" else {}
+                    state = block.get("state") if block.get("type") == "provider_state" else None
+                    if not isinstance(state, dict):
+                        continue
                     if state.get("provider") == provider and state.get("model") == model_name:
                         if state.get("reasoning_details"):
                             m["reasoning_details"] = state["reasoning_details"]
