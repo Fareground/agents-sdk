@@ -419,6 +419,7 @@ async def test_resume_after_cancel_generates_again():
 @pytest.mark.asyncio
 async def test_provider_overflow_forces_compaction_for_the_actual_model():
     from unittest.mock import AsyncMock
+
     from fg_agents.core.errors import ContextOverflowError
     from fg_agents.core.types import AgentMessage
 
