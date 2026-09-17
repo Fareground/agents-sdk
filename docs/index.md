@@ -24,7 +24,7 @@ The Agents SDK (`fg-agents`) provides a simple entry point for a model-backed as
 python -m pip install "fg-agents[anthropic]"
 ```
 
-Python 3.11 or later. Install the extra for your provider or integration. These pages describe **0.4.3**; check `fg_agents.__version__` in your installed environment.
+Python 3.11 or later. Install the extra for your provider or integration. These pages describe **0.4.4**; check `fg_agents.__version__` in your installed environment.
 
 ## Relationship to the Environments SDK
 
