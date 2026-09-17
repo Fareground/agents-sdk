@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.5] - 2026-09-16
+
+- Correct model-facing tool failure guidance: failures and timeouts do not imply
+  that all effects were rolled back. Preserve the reason and direct recovery
+  through inspection and tool-specific guidance rather than blind retries.
+
 ## [0.4.4] - 2026-09-16
 
 - Force context compaction after provider overflow and rebuild context for the
