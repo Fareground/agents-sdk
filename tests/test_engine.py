@@ -151,9 +151,11 @@ async def test_max_turns_stops_loop():
 
 @pytest.mark.asyncio
 async def test_tool_error_is_reported():
-    """When a tool raises an exception, the error is captured gracefully."""
+    """A failed tool can have side effects; report failure without claiming rollback."""
+    saved = []
     @tool(name="fail_tool", description="Always fails")
     async def fail_tool(x: str) -> dict:
+        saved.append(x)
         raise ValueError("Something went wrong")
 
     llm = MockLLM([
@@ -172,6 +174,11 @@ async def test_tool_error_is_reported():
     tool_results = [e for e in events if e.type == EventType.TOOL_RESULT]
     assert len(tool_results) == 1
     assert tool_results[0].data["status"] == "error"
+    assert saved == ["boom"]
+    message = next(m for m in await repo.get_messages("s1") if m.role == MessageRole.TOOL_RESULT)
+    assert "TOOL CALL FAILED" in message.content and "Something went wrong" in message.content
+    assert "NOT take effect" not in message.content
+    assert "effects may have occurred" in message.content
 
     # Session should still complete (engine doesn't crash on tool errors)
     assert EventType.SESSION_COMPLETED in [e.type for e in events]
