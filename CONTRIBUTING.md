@@ -1,4 +1,4 @@
-# Contributing to agent-framework
+# Contributing to Agents SDK
 
 Thanks for helping improve the framework. This document covers local setup,
 tests, style, and commit conventions.
@@ -6,8 +6,8 @@ tests, style, and commit conventions.
 ## Development setup
 
 ```bash
-git clone <repository-url> agent-framework
-cd agent-framework
+git clone https://github.com/Fareground/agents-sdk.git
+cd agents-sdk
 python -m venv .venv
 source .venv/bin/activate
 pip install -e ".[dev,sqlite]"
