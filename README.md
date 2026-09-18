@@ -15,7 +15,7 @@
   <a href="https://github.com/Fareground/agents-sdk/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/Fareground/agents-sdk/ci.yml?branch=main&style=flat-square&label=CI" /></a>
   <img src="https://img.shields.io/badge/python-3.11%2B-blue" alt="Python 3.11+" />
   <a href="https://pypi.org/project/fg-agents/"><img src="https://img.shields.io/pypi/v/fg-agents?style=flat-square" alt="PyPI" /></a>
-  <img src="https://img.shields.io/badge/license-Apache--2.0-lightgrey" alt="Apache-2.0" />
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-lightgrey" alt="Apache-2.0" /></a>
 </p>
 
 ---
@@ -23,6 +23,14 @@
 ## Overview
 
 The Agents SDK provides `ask()` for one-shot requests, `Agent` for conversations, and explicit engine components for application integration. Add tools, stream results, and choose in-memory, SQLite or PostgreSQL persistence.
+
+Use this package when you are building an agent application: model calls, tool execution,
+conversation state, streaming, persistence, scheduling, or sub-agent orchestration. It is not a
+simulation engine, an identity protocol, or a cross-agent messaging network. Use
+[`fg-env`](https://github.com/Fareground/environments-sdk) for simulated environments,
+[`agent-id`](https://github.com/Fareground/agent-id) for portable identity, and
+[`agent-messaging`](https://github.com/Fareground/agent-messaging) when independent agents need to
+contact each other across trust boundaries.
 
 [Documentation](https://fareground.com/docs/agent-framework/) · [Quickstart](docs/getting-started.md) · [Tools](docs/tools.md) · [Production integration](docs/production.md)
 
@@ -306,6 +314,11 @@ tests/             Test suite
 Development setup, tests, linting, and commit conventions live in
 [CONTRIBUTING.md](CONTRIBUTING.md). See the [changelog](CHANGELOG.md) for what's
 changed.
+
+## License
+
+Apache License 2.0. See [LICENSE](LICENSE) for the full terms. Report vulnerabilities through the
+private process in [SECURITY.md](SECURITY.md), not a public issue.
 
 ---
 
