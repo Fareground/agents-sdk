@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.7] - 2026-09-28
+
+- OpenAI-compatible streams (OpenAI, OpenRouter, Cerebras and others) report a tool
+  call's arguments as they are written (`tool_call_delta`), as Anthropic streams
+  already did, so a host can show a tool call before it completes.
+
 ## [0.4.6] - 2026-09-17
 
 - Preserve OpenRouter reasoning continuation data across streamed tool calls and
