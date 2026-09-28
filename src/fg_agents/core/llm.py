@@ -828,10 +828,17 @@ class AgentLLM:
                                 tool_call_id=tool_call_buffers[idx]["id"],
                                 tool_name=tool_call_buffers[idx]["name"],
                             )
-                        if tc_delta.function and tc_delta.function.arguments:
-                            tool_call_buffers[idx]["fragments"].append(tc_delta.function.arguments)
                         if tc_delta.id and not tool_call_buffers[idx]["id"]:
                             tool_call_buffers[idx]["id"] = tc_delta.id
+                        if tc_delta.function and tc_delta.function.arguments:
+                            tool_call_buffers[idx]["fragments"].append(tc_delta.function.arguments)
+                            # As on the Anthropic path: a host can show a tool call while it is written.
+                            yield LLMStreamChunk(
+                                type="tool_call_delta",
+                                tool_call_id=tool_call_buffers[idx]["id"],
+                                tool_name=tool_call_buffers[idx]["name"],
+                                arguments_delta=tc_delta.function.arguments,
+                            )
 
                 # Record the stop reason but do NOT flush here. Some
                 # OpenAI-compatible providers (notably via OpenRouter, and with
